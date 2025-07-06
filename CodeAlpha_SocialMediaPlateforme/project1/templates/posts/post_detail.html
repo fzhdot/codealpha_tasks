@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ post.title }}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .post-header {
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .post-title {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        .post-meta {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+        .post-content {
+            font-size: 1.1em;
+            line-height: 1.8;
+            color: #444;
+            margin-bottom: 40px;
+        }
+        .comments-section {
+            border-top: 2px solid #e0e0e0;
+            padding-top: 30px;
+        }
+        .comments-title {
+            color: #333;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+        }
+        .comment {
+            background-color: #f9f9f9;
+            border-left: 4px solid #4CAF50;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+        .comment-author {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .comment-date {
+            color: #666;
+            font-size: 0.8em;
+            margin-bottom: 10px;
+        }
+        .comment-content {
+            color: #555;
+            line-height: 1.5;
+        }
+        .comment-form {
+            background-color: #f0f8ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        .form-group textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: inherit;
+            resize: vertical;
+        }
+        .btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #45a049;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #4CAF50;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .no-comments {
+            color: #666;
+            font-style: italic;
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Lien de retour -->
+        <a href="{% url 'post_list' %}" class="back-link">← Retour à la liste des posts</a>
+        
+        <!-- En-tête du post -->
+        <div class="post-header">
+            <h1 class="post-title">{{ post.title }}</h1>
+            <div class="post-meta">
+                <strong>Auteur:</strong> {{ post.author.username }} | 
+                <strong>Publié le:</strong> {{ post.created_at|date:"d/m/Y à H:i" }}
+                {% if post.updated_at %}
+                | <strong>Modifié le:</strong> {{ post.updated_at|date:"d/m/Y à H:i" }}
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Contenu du post -->
+        <div class="post-content">
+            {{ post.content|linebreaks }}
+        </div>
+
+        <!-- Section des commentaires -->
+        <div class="comments-section">
+            <h2 class="comments-title">
+                Commentaires ({{ post.comments.count }})
+            </h2>
+
+            <!-- Liste des commentaires -->
+            {% if post.comments.all %}
+                {% for comment in post.comments.all %}
+                <div class="comment">
+                    <div class="comment-author">{{ comment.author.username }}</div>
+                    <div class="comment-date">{{ comment.created_at|date:"d/m/Y à H:i" }}</div>
+                    <div class="comment-content">{{ comment.content|linebreaks }}</div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="no-comments">
+                    Aucun commentaire pour le moment. Soyez le premier à commenter !
+                </div>
+            {% endif %}
+
+            <!-- Formulaire d'ajout de commentaire -->
+            {% if user.is_authenticated %}
+            <div class="comment-form">
+                <h3>Ajouter un commentaire</h3>
+                <form method="post" action="{% url 'add_comment' post.id %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="content">Votre commentaire :</label>
+                        <textarea name="content" id="content" placeholder="Écrivez votre commentaire ici..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn">Publier le commentaire</button>
+                </form>
+            </div>
+            {% else %}
+            <div class="comment-form">
+                <p>Vous devez être <a href="{% url 'login' %}">connecté</a> pour ajouter un commentaire.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
